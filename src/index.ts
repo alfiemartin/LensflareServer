@@ -19,39 +19,45 @@ const main = async () => {
     emitSchemaFile: path.resolve(__dirname, "schema.gql"),
   });
 
-  app.use(cors());
-
-  app.use(
-    session({
-      name: "mine",
-      secret: "your mama",
-      resave: false,
-      saveUninitialized: false,
-      cookie: {
-        secure: false,
-        maxAge: 60 * 60 * 1000 * 24,
-        httpOnly: true,
-      },
-    })
-  );
+  // app.use(
+  //   session({
+  //     name: "mine",
+  //     secret: "your mama",
+  //     resave: false,
+  //     saveUninitialized: false,
+  //     cookie: {
+  //       secure: false,
+  //       maxAge: 60 * 60 * 1000 * 24,
+  //       httpOnly: true,
+  //     },
+  //   })
+  // );
+  app.use(cors({ origin: "*", credentials: true }));
 
   const apolloServer = new ApolloServer({
     schema,
-    context: ({ req, res }): any => ({ req, res }),
+    context: ({ req, res }) => ({ req, res }),
   });
   await apolloServer.start();
 
-  apolloServer.applyMiddleware({ app, path: "/graphql" });
+  apolloServer.applyMiddleware({
+    app,
+    path: "/graphql",
+    cors: { origin: "*", credentials: true },
+  });
 
   app.listen(4000, () => {
     console.log("server running on http://localhost:4000");
+  });
+
+  app.get("/test", (req, res) => {
+    res.send("test endpoint get successful");
   });
 
   try {
     await mongoose.connect(DB_URI);
   } catch (error) {
     console.log("Error connecting to mongo db", error);
-    return;
   }
 
   console.log("Successfully connected to mongo db");
