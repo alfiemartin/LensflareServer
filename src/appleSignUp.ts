@@ -16,8 +16,17 @@ const createUser = async (tokenData: ITokenData) => {
   }
 };
 
-export const appleSignUp = async (req: Request, res: Response) => {
+export const appleSignUp = async (
+  req: Request & {
+    session: {
+      name: string;
+    };
+  },
+  res: Response
+) => {
   const token: string = req.body.identityToken;
+
+  console.log(req.session.name);
 
   const decodedHeader: ITokenHeader = jwtDecode(token, { header: true });
 
@@ -47,7 +56,8 @@ export const appleSignUp = async (req: Request, res: Response) => {
     throw new Error("issuer does not match");
   }
 
-  createUser(verifiedTokenData);
+  // createUser(verifiedTokenData);
+  const sessionId = req.session.id;
 
-  res.send({ message: "signup was succesful" });
+  res.send({ message: "signup was succesful", sessionId: sessionId });
 };

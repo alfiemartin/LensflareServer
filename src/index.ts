@@ -1,8 +1,8 @@
 require("dotenv").config();
 import "reflect-metadata";
 
-import express from "express";
-import session from "express-session";
+import express, { Request } from "express";
+import session, { MemoryStore } from "express-session";
 import cors from "cors";
 import { ApolloServer } from "apollo-server-express";
 import mongoose from "mongoose";
@@ -10,6 +10,7 @@ import { NameResolver, UserResolver } from "./graphql/resolvers";
 import { buildSchema } from "type-graphql";
 import * as path from "path";
 import { appleSignUp } from "./appleSignUp";
+var cookieParser = require("cookie-parser");
 
 const main = async () => {
   const DB_URI = process.env.DB_URI!;
@@ -19,16 +20,21 @@ const main = async () => {
     resolvers: [NameResolver, UserResolver],
     emitSchemaFile: path.resolve(__dirname, "schema.gql"),
   });
+  const secret = "hdsahdhsbdasd";
+
+  app.use(cookieParser(secret));
 
   app.use(
     session({
       name: "mine",
-      secret: "your mama",
-      resave: false,
-      saveUninitialized: false,
+      store: new MemoryStore(),
+      resave: true,
+      secret: secret,
+      saveUninitialized: true,
       cookie: {
+        httpOnly: false,
+        sameSite: "none",
         secure: false,
-        httpOnly: true,
       },
     })
   );
@@ -53,10 +59,14 @@ const main = async () => {
   });
 
   app.get("/test", (req, res) => {
-    res.send("test endpoint get successful");
+    const sessionId = req.session.id;
+
+    res.send({ message: "test endpoint", sessionId: sessionId });
   });
 
-  app.post("/appleSignUp", appleSignUp);
+  app.post("/appleSignUp", (req, res) =>
+    appleSignUp(req as Request & { session: { name: string } }, res)
+  );
 
   try {
     await mongoose.connect(DB_URI);
