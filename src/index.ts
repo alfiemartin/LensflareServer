@@ -24,10 +24,12 @@ const main = async () => {
 
   app.use(cookieParser(secret));
 
+  const store = new MemoryStore();
+
   app.use(
     session({
       name: "mine",
-      store: new MemoryStore(),
+      store: store,
       resave: true,
       secret: secret,
       saveUninitialized: true,
@@ -60,6 +62,22 @@ const main = async () => {
 
   app.get("/test", (req, res) => {
     const sessionId = req.session.id;
+    console.log(sessionId);
+
+    store.get(sessionId, (err, session) => {
+      console.log(session);
+
+      const newSessionData = session;
+      newSessionData?.name += "a";
+
+      if (session) store.set(sessionId, newSessionData);
+    });
+
+    //can get sessionId from body
+    //this will be saved to keychain
+    //access session through store.get
+
+    if (!req.session.name) req.session.name = "alfie";
 
     res.send({ message: "test endpoint", sessionId: sessionId });
   });
