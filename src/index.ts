@@ -76,6 +76,7 @@ const main = async () => {
     //can get sessionId from body
     //this will be saved to keychain
     //access session through store.get
+    //can probably just set the new session each time to the saved session on server
 
     if (!req.session.name) req.session.name = "alfie";
 
