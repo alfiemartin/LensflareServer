@@ -59,6 +59,8 @@ export const appleSignIn = async (req: Request, res: Response) => {
     password: "apple",
   });
 
+  console.log(user);
+
   if (user) {
     req.session.userId = user._id;
 

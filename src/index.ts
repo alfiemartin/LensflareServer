@@ -80,14 +80,9 @@ const main = async () => {
       if (newSessionData) store.set(sessionId, newSessionData);
     });
 
-    //can get sessionId from body
-    //this will be saved to keychain
-    //access session through store.get
-    //can probably just set the new session each time to the saved session on server
-
     if (!req.session.name) req.session.name = "alfie";
 
-    res.send({ message: "test endpoint", sessionId: sessionId });
+    res.send({ message: "test endpoint", session: req.session });
   });
 
   app.post("/appleSignIn", appleSignIn);
