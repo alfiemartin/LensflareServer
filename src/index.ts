@@ -11,6 +11,7 @@ import { buildSchema } from "type-graphql";
 import * as path from "path";
 import { appleSignIn, appleSignUp } from "./appleSignUp";
 var cookieParser = require("cookie-parser");
+import MongoStore from "connect-mongo";
 
 declare module "express-session" {
   interface SessionData {
@@ -31,7 +32,9 @@ const main = async () => {
 
   app.use(cookieParser(secret));
 
-  const store = new MemoryStore();
+  const store = MongoStore.create({
+    mongoUrl: process.env.DB_URI,
+  });
 
   app.use(
     session({
@@ -75,6 +78,7 @@ const main = async () => {
       console.log(session);
 
       const newSessionData = session;
+
       if (newSessionData && newSessionData.name) newSessionData.name += "a";
 
       if (newSessionData) store.set(sessionId, newSessionData);
@@ -85,7 +89,7 @@ const main = async () => {
     res.send({ message: "test endpoint", session: req.session });
   });
 
-  app.post("/appleSignIn", appleSignIn);
+  app.post("/appleSignIn", (req, res) => appleSignIn(req, res, store));
 
   try {
     await mongoose.connect(DB_URI);
