@@ -5,10 +5,11 @@ import jwtDecode from "jwt-decode";
 import axios from "axios";
 import { userModel } from "./mongoDB/modals";
 import { ITokenData, ITokenHeader, IAppleKey } from "./types";
+import { User } from "./graphql/schema";
 
 const createUser = async (tokenData: ITokenData) => {
   const username = tokenData.email;
-  console.log(tokenData);
+
   try {
     await userModel.create({ username, password: "apple", email: username });
   } catch (e) {
@@ -16,14 +17,11 @@ const createUser = async (tokenData: ITokenData) => {
   }
 };
 
-export const appleSignUp = async (
-  req: Request & {
-    session: {
-      name: string;
-    };
-  },
-  res: Response
-) => {
+export const appleSignUp = async (req: Request, res: Response) => {
+  res.send({ message: "signup was succesful" });
+};
+
+export const appleSignIn = async (req: Request, res: Response) => {
   const token: string = req.body.identityToken;
 
   console.log(req.session.name);
@@ -56,8 +54,17 @@ export const appleSignUp = async (
     throw new Error("issuer does not match");
   }
 
-  // createUser(verifiedTokenData);
-  const sessionId = req.session.id;
+  const user: User = await userModel.findOne({
+    username: verifiedTokenData.email,
+    password: "apple",
+  });
 
-  res.send({ message: "signup was succesful", sessionId: sessionId });
+  if (user) {
+    req.session.userId = user._id;
+
+    res.send({ message: "login successful", success: true, sessionId: req.session.id });
+  } else {
+    res.send({ message: "could not find user", success: false });
+    throw new Error("User does not exist");
+  }
 };

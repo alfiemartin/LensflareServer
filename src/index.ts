@@ -9,8 +9,15 @@ import mongoose from "mongoose";
 import { NameResolver, UserResolver } from "./graphql/resolvers";
 import { buildSchema } from "type-graphql";
 import * as path from "path";
-import { appleSignUp } from "./appleSignUp";
+import { appleSignIn, appleSignUp } from "./appleSignUp";
 var cookieParser = require("cookie-parser");
+
+declare module "express-session" {
+  interface SessionData {
+    name: string | undefined;
+    userId: string | undefined;
+  }
+}
 
 const main = async () => {
   const DB_URI = process.env.DB_URI!;
@@ -68,9 +75,9 @@ const main = async () => {
       console.log(session);
 
       const newSessionData = session;
-      newSessionData?.name += "a";
+      if (newSessionData && newSessionData.name) newSessionData.name += "a";
 
-      if (session) store.set(sessionId, newSessionData);
+      if (newSessionData) store.set(sessionId, newSessionData);
     });
 
     //can get sessionId from body
@@ -83,9 +90,7 @@ const main = async () => {
     res.send({ message: "test endpoint", sessionId: sessionId });
   });
 
-  app.post("/appleSignUp", (req, res) =>
-    appleSignUp(req as Request & { session: { name: string } }, res)
-  );
+  app.post("/appleSignIn", appleSignIn);
 
   try {
     await mongoose.connect(DB_URI);
