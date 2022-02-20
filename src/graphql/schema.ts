@@ -21,6 +21,8 @@ export class User {
   email: string;
   @Field()
   password: string;
+  @Field()
+  name: string;
 }
 @ObjectType()
 export class CrudResponse {
@@ -36,6 +38,8 @@ export class AppleAuthResponse {
   message?: string;
   @Field({ nullable: true })
   success?: boolean;
+  @Field({ nullable: true })
+  name?: string;
   @Field({ nullable: true })
   sessionId?: string;
   @Field(() => [String], { nullable: true })

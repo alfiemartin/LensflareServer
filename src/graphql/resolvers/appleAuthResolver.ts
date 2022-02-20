@@ -77,6 +77,7 @@ export class AppleAuthResolver {
           response.success = true;
           response.message = "Successfully set session to previous session";
           response.sessionId = req.sessionID;
+          response.name = req.session.name;
           //we are now logged in
           return response;
         } catch (e) {
@@ -132,6 +133,7 @@ export class AppleAuthResolver {
       response.message = "signed in successfully";
       response.success = true;
       response.sessionId = req.sessionID;
+      response.name = user.name;
     } else {
       response.message = "failed to find user. User does not exist";
       response.success = false;
