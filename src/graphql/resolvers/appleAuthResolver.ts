@@ -59,22 +59,30 @@ export class AppleAuthResolver {
     const response = new AppleAuthResponse();
     const clientSessionId = sessionId;
 
-    if (clientSessionId && clientSessionId != req.sessionID) {
-      try {
-        const prevSession = await getPrevSession(clientSessionId, store);
-
-        req.session.userId = prevSession.userId;
-        req.session.name = prevSession.name;
-
+    if (clientSessionId) {
+      if (clientSessionId == req.sessionID) {
         response.success = true;
-        response.message = "Successfully set session to previous session";
-        response.sessionId = req.sessionID;
+        response.message = "already logged in";
 
-        //we are now logged in
         return response;
-      } catch (e) {
-        response.success = false;
-        response.message = "error getting previous sesssion from client sessionID";
+      } else if (clientSessionId != req.sessionID) {
+        try {
+          const prevSession = await getPrevSession(clientSessionId, store);
+
+          store.destroy(clientSessionId);
+
+          req.session.userId = prevSession.userId;
+          req.session.name = prevSession.name;
+
+          response.success = true;
+          response.message = "Successfully set session to previous session";
+          response.sessionId = req.sessionID;
+          //we are now logged in
+          return response;
+        } catch (e) {
+          response.success = false;
+          response.message = "error getting previous sesssion from client sessionID";
+        }
       }
     }
 
@@ -123,6 +131,7 @@ export class AppleAuthResolver {
       req.session.userId = user._id;
       response.message = "signed in successfully";
       response.success = true;
+      response.sessionId = req.sessionID;
     } else {
       response.message = "failed to find user. User does not exist";
       response.success = false;
