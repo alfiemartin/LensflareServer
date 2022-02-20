@@ -2,11 +2,11 @@ require("dotenv").config();
 import "reflect-metadata";
 
 import express, { Request } from "express";
-import session, { MemoryStore } from "express-session";
+import session from "express-session";
 import cors from "cors";
 import { ApolloServer } from "apollo-server-express";
 import mongoose from "mongoose";
-import { NameResolver, UserResolver } from "./graphql/resolvers";
+import { AppleAuthResolver, NameResolver, UserResolver } from "./graphql/resolvers";
 import { buildSchema } from "type-graphql";
 import * as path from "path";
 import { appleSignIn, appleSignUp } from "./appleSignUp";
@@ -25,7 +25,7 @@ const main = async () => {
   const app = express();
 
   const schema = await buildSchema({
-    resolvers: [NameResolver, UserResolver],
+    resolvers: [NameResolver, UserResolver, AppleAuthResolver],
     emitSchemaFile: path.resolve(__dirname, "schema.gql"),
   });
   const secret = "hdsahdhsbdasd";
@@ -56,7 +56,7 @@ const main = async () => {
 
   const apolloServer = new ApolloServer({
     schema,
-    context: ({ req, res }) => ({ req, res }),
+    context: ({ req, res }) => ({ req, res, store }),
   });
   await apolloServer.start();
 
@@ -68,25 +68,6 @@ const main = async () => {
 
   app.listen(4000, () => {
     console.log("server running on http://localhost:4000");
-  });
-
-  app.get("/test", (req, res) => {
-    const sessionId = req.session.id;
-    console.log(sessionId);
-
-    store.get(sessionId, (err, session) => {
-      console.log(session);
-
-      const newSessionData = session;
-
-      if (newSessionData && newSessionData.name) newSessionData.name += "a";
-
-      if (newSessionData) store.set(sessionId, newSessionData);
-    });
-
-    if (!req.session.name) req.session.name = "alfie";
-
-    res.send({ message: "test endpoint", session: req.session });
   });
 
   app.post("/appleSignIn", (req, res) => appleSignIn(req, res, store));

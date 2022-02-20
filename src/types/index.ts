@@ -1,3 +1,6 @@
+import MongoStore from "connect-mongo";
+import { Request, Response } from "express";
+
 export interface ITokenData {
   iss: string;
   aud: string;
@@ -24,3 +27,5 @@ export interface ITokenHeader {
   kid: string;
   alg: string;
 }
+
+export type IContext = { req: Request; res: Response; store: MongoStore };

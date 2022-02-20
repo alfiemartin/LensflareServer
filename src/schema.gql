@@ -3,6 +3,13 @@
 # !!!   DO NOT MODIFY THIS FILE BY YOURSELF   !!!
 # -----------------------------------------------
 
+type AppleAuthResponse {
+  data: [String!]
+  message: String
+  sessionId: String
+  success: Boolean
+}
+
 type CrudResponse {
   message: String!
   success: Boolean!
@@ -22,6 +29,7 @@ type Name {
 type Query {
   name(firstname: String!): Name!
   names: [Name!]!
+  test: AppleAuthResponse!
   users: [User!]!
 }
 

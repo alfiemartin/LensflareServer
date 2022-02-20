@@ -31,23 +31,26 @@ export const appleSignIn = async (req: Request, res: Response, store: MongoStore
   //if no sessionId then run below checks
 
   const token: string = req.body.identityToken;
-  const sessionId: string | undefined = req.body.sessionId;
+  const clientSessionId: string | undefined = req.body.sessionId;
+  const userId: string | undefined = req.body.userId;
 
   console.log(req.session);
+  console.log(clientSessionId);
 
-  if (sessionId) {
-    store.get(sessionId, (err, session) => {
+  if (clientSessionId && clientSessionId != req.sessionID) {
+    store.get(clientSessionId, (err, session) => {
       console.log("old store", session);
       //set current session to previous session
       if (session) {
-        store.set(req.sessionID, session, (err) => {});
+        req.session.userId = session.userId;
+        req.session.name = session.name;
 
         res.json({ message: "logged in", success: true });
       }
     });
   }
 
-  console.log(req.session);
+  // console.log("new sesion ", req.session);
 
   // const decodedHeader: ITokenHeader = jwtDecode(token, { header: true });
 
