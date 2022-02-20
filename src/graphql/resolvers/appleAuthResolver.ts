@@ -50,7 +50,7 @@ export class AppleAuthResolver {
     return response;
   }
 
-  @Mutation((returns) => AppleAuthResponse)
+  @Query((returns) => AppleAuthResponse)
   async appleSignIn(
     @Arg("credential") credential: AppleAuthenticationCredential,
     @Arg("sessionId", { nullable: true }) sessionId: string,
@@ -140,5 +140,67 @@ export class AppleAuthResolver {
     }
 
     return response;
+  }
+  @Query((returns) => AppleAuthResponse)
+  async appleSignUp(
+    @Arg("credential") credential: AppleAuthenticationCredential,
+    @Ctx() { req, res, store }: IContext
+  ) {
+    const response = new AppleAuthResponse();
+
+    const token = credential.identityToken;
+
+    const decodedHeader: ITokenHeader = jwtDecode(token, { header: true });
+
+    const appleKeys: Array<IAppleKey> = await (
+      await axios.get("https://appleid.apple.com/auth/keys")
+    ).data.keys;
+
+    const matchingKey = appleKeys.filter((key) => key.kid == decodedHeader.kid)[0];
+
+    const client = new jwksRsa.JwksClient({
+      jwksUri: "https://appleid.apple.com/auth/keys",
+    });
+
+    const key = await client.getSigningKey(matchingKey.kid);
+    const signingKey = key.getPublicKey();
+
+    let verifiedTokenData: ITokenData;
+    try {
+      verifiedTokenData = jwt.verify(token, signingKey) as ITokenData;
+    } catch (e) {
+      response.message = "Failed to verify token: ";
+      response.success = false;
+
+      return response;
+    }
+
+    if (verifiedTokenData.iss != "https://appleid.apple.com") {
+      response.message = "Token issuer incorrect";
+      response.success = false;
+
+      return response;
+    }
+
+    const { email, fullName } = credential;
+
+    try {
+      const user = await userModel.create({
+        username: email,
+        email,
+        name: fullName.givenName,
+        password: "apple",
+      });
+
+      response.success = true;
+      response.message = "successfully creatde new user";
+      response.sessionId = req.sessionID;
+    } catch (e) {
+      response.success = false;
+      response.message = "failed to signup user";
+      response.name = fullName.givenName;
+
+      return response;
+    }
   }
 }
