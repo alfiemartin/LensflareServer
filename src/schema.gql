@@ -10,6 +10,25 @@ type AppleAuthResponse {
   success: Boolean
 }
 
+input AppleAuthenticationCredential {
+  authorizationCode: String
+  email: String
+  fullName: AppleCredsFullName
+  identityToken: String
+  realUserStatus: Float
+  state: String
+  user: String
+}
+
+input AppleCredsFullName {
+  familyName: String
+  givenName: String
+  middleName: String
+  namePrefix: String
+  nameSuffix: String
+  nickname: String
+}
+
 type CrudResponse {
   message: String!
   success: Boolean!
@@ -17,7 +36,7 @@ type CrudResponse {
 
 type Mutation {
   addName(firstname: String!, secondname: String!): CrudResponse!
-  appleSignIn(sessionId: String!): AppleAuthResponse!
+  appleSignIn(credential: AppleAuthenticationCredential!, sessionId: String!): AppleAuthResponse!
   createUser(email: String!, password: String!, username: String!): CrudResponse!
 }
 

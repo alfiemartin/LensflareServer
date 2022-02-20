@@ -1,5 +1,5 @@
 import { GraphQLScalarType } from "graphql";
-import { Field, ObjectType } from "type-graphql";
+import { Field, InputType, ObjectType } from "type-graphql";
 
 @ObjectType()
 export class Name {
@@ -40,4 +40,38 @@ export class AppleAuthResponse {
   sessionId?: string;
   @Field(() => [String], { nullable: true })
   data?: string[];
+}
+
+@InputType()
+class AppleCredsFullName {
+  @Field({ nullable: true })
+  namePrefix: string;
+  @Field({ nullable: true })
+  givenName: string;
+  @Field({ nullable: true })
+  middleName: string;
+  @Field({ nullable: true })
+  familyName: string;
+  @Field({ nullable: true })
+  nameSuffix: string;
+  @Field({ nullable: true })
+  nickname: string;
+}
+
+@InputType()
+export class AppleAuthenticationCredential {
+  @Field((returns) => String, { nullable: true })
+  user: string;
+  @Field((returns) => String, { nullable: true })
+  state: string;
+  @Field((returns) => AppleCredsFullName, { nullable: true })
+  fullName: AppleCredsFullName;
+  @Field((returns) => String, { nullable: true })
+  email: string;
+  @Field((returns) => Number, { nullable: true })
+  realUserStatus: number;
+  @Field((returns) => String, { nullable: true })
+  identityToken: string;
+  @Field((returns) => String, { nullable: true })
+  authorizationCode: string;
 }
