@@ -17,6 +17,7 @@ type CrudResponse {
 
 type Mutation {
   addName(firstname: String!, secondname: String!): CrudResponse!
+  appleSignIn(sessionId: String!): AppleAuthResponse!
   createUser(email: String!, password: String!, username: String!): CrudResponse!
 }
 
