@@ -1,5 +1,5 @@
 import { GraphQLScalarType } from "graphql";
-import { Field, InputType, ObjectType } from "type-graphql";
+import { Field, InputType, ObjectType, registerEnumType } from "type-graphql";
 
 @ObjectType()
 export class Name {

@@ -1,10 +1,25 @@
 import axios from "axios";
+import MongoStore from "connect-mongo";
 import { SessionData } from "express-session";
-import { GraphQLInputObjectType } from "graphql";
+import jwt from "jsonwebtoken";
+import jwksRsa from "jwks-rsa";
 import jwtDecode from "jwt-decode";
 import { Arg, Ctx, Mutation, Query, Resolver } from "type-graphql";
-import { IAppleKey, IContext, ITokenHeader } from "../../types";
-import { AppleAuthenticationCredential, AppleAuthResponse } from "../schema";
+import { userModel } from "../../mongoDB/modals";
+import { IAppleKey, IContext, ITokenData, ITokenHeader } from "../../types";
+import { AppleAuthenticationCredential, AppleAuthResponse, User } from "../schema";
+
+const getPrevSession = (clientSessionId: string, store: MongoStore) => {
+  return new Promise<SessionData>((resolve, reject) => {
+    store.get(clientSessionId, (err, session) => {
+      if (session) {
+        resolve(session);
+      } else {
+        reject();
+      }
+    });
+  });
+};
 
 @Resolver()
 export class AppleAuthResolver {
@@ -37,94 +52,82 @@ export class AppleAuthResolver {
 
   @Mutation((returns) => AppleAuthResponse)
   async appleSignIn(
-    @Ctx() { req, res, store }: IContext,
-    @Arg("sessionId") sessionId: string,
-    @Arg("credential") credential: AppleAuthenticationCredential
+    @Arg("credential") credential: AppleAuthenticationCredential,
+    @Arg("sessionId", { nullable: true }) sessionId: string,
+    @Ctx() { req, res, store }: IContext
   ) {
     const response = new AppleAuthResponse();
+    const clientSessionId = sessionId;
 
-    return response;
-    // const clientSessionId: string | undefined = sessionId;
+    if (clientSessionId && clientSessionId != req.sessionID) {
+      try {
+        const prevSession = await getPrevSession(clientSessionId, store);
 
-    // const getPrevSession = (clientSessionId: string) => {
-    //   return new Promise<SessionData>((resolve, reject) => {
-    //     store.get(clientSessionId, (err, session) => {
-    //       if (session) {
-    //         resolve(session);
-    //       } else {
-    //         reject();
-    //       }
-    //     });
-    //   });
-    // };
+        req.session.userId = prevSession.userId;
+        req.session.name = prevSession.name;
 
-    // if (clientSessionId && clientSessionId != req.sessionID) {
-    //   try {
-    //     const prevSession = await getPrevSession(clientSessionId);
+        response.success = true;
+        response.message = "Successfully set session to previous session";
+        response.sessionId = req.sessionID;
 
-    //     req.session.userId = prevSession.userId;
-    //     req.session.name = prevSession.name;
-
-    //     response.success = true;
-    //     response.message = "Successfully set session to previous session";
-    //     response.sessionId = req.sessionID;
-    //     response.data = [req.session.name ?? "no name"];
-
-    //     //we are now logged in
-    //     return response;
-    //   } catch (e) {
-    //     response.success = false;
-    //     response.message = "error getting previous sesssion from client sessionID";
-    //     response.data = ["clientSessionId: " + clientSessionId];
-    //     // return response;
-    //   }
-    // }
+        //we are now logged in
+        return response;
+      } catch (e) {
+        response.success = false;
+        response.message = "error getting previous sesssion from client sessionID";
+      }
+    }
 
     //if we are here then we have no client sessionID, so need to auth with apple..
-    // const token = credentials.identityToken;
 
-    // const decodedHeader: ITokenHeader = jwtDecode(token, { header: true });
+    const token = credential.identityToken;
 
-    // const appleKeys: Array<IAppleKey> = await (
-    //   await axios.get("https://appleid.apple.com/auth/keys")
-    // ).data.keys;
+    const decodedHeader: ITokenHeader = jwtDecode(token, { header: true });
 
-    // const matchingKey = appleKeys.filter((key) => key.kid == decodedHeader.kid)[0];
+    const appleKeys: Array<IAppleKey> = await (
+      await axios.get("https://appleid.apple.com/auth/keys")
+    ).data.keys;
 
-    // const client = new jwksRsa.JwksClient({
-    //   jwksUri: "https://appleid.apple.com/auth/keys",
-    // });
+    const matchingKey = appleKeys.filter((key) => key.kid == decodedHeader.kid)[0];
 
-    // const key = await client.getSigningKey(matchingKey.kid);
-    // const signingKey = key.getPublicKey();
+    const client = new jwksRsa.JwksClient({
+      jwksUri: "https://appleid.apple.com/auth/keys",
+    });
 
-    // let verifiedTokenData: ITokenData;
-    // try {
-    //   verifiedTokenData = jwt.verify(token, signingKey) as ITokenData;
-    // } catch (e) {
-    //   res.send("error signing up with apple");
-    //   throw new Error("Failed to verify token");
-    // }
+    const key = await client.getSigningKey(matchingKey.kid);
+    const signingKey = key.getPublicKey();
 
-    // if (verifiedTokenData.iss != "https://appleid.apple.com") {
-    //   res.send("error signing up with apple");
-    //   throw new Error("issuer does not match");
-    // }
+    let verifiedTokenData: ITokenData;
+    try {
+      verifiedTokenData = jwt.verify(token, signingKey) as ITokenData;
+    } catch (e) {
+      response.message = "Failed to verify token: ";
+      response.success = false;
 
-    // const user: User = await userModel.findOne({
-    //   username: verifiedTokenData.email,
-    //   password: "apple",
-    // });
+      return response;
+    }
 
-    // console.log(user);
+    if (verifiedTokenData.iss != "https://appleid.apple.com") {
+      response.message = "Token issuer incorrect";
+      response.success = false;
 
-    // if (user) {
-    //   req.session.userId = user._id;
+      return response;
+    }
 
-    //   res.send({ message: "login successful", success: true, sessionId: req.session.id });
-    // } else {
-    //   res.send({ message: "could not find user", success: false });
-    //   throw new Error("User does not exist");
-    // }
+    const user = await userModel.findOne<User>({
+      username: verifiedTokenData.email,
+      password: "apple",
+    });
+
+    if (user) {
+      req.session.userId = user._id;
+      response.message = "signed in successfully";
+      response.success = true;
+    } else {
+      response.message = "failed to find user. User does not exist";
+      response.success = false;
+    }
+
+    return response;
   }
 }

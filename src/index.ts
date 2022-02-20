@@ -9,7 +9,6 @@ import mongoose from "mongoose";
 import { AppleAuthResolver, NameResolver, UserResolver } from "./graphql/resolvers";
 import { buildSchema } from "type-graphql";
 import * as path from "path";
-import { appleSignIn, appleSignUp } from "./appleSignUp";
 var cookieParser = require("cookie-parser");
 import MongoStore from "connect-mongo";
 
@@ -69,8 +68,6 @@ const main = async () => {
   app.listen(4000, () => {
     console.log("server running on http://localhost:4000");
   });
-
-  app.post("/appleSignIn", (req, res) => appleSignIn(req, res, store));
 
   try {
     await mongoose.connect(DB_URI);
