@@ -32,7 +32,7 @@ const main = async () => {
   app.use(cookieParser(secret));
 
   const store = MongoStore.create({
-    mongoUrl: process.env.DB_URI,
+    mongoUrl: DB_URI,
   });
 
   app.use(
