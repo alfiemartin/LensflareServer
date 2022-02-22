@@ -28,16 +28,19 @@ export class AppleAuthResolver {
     const response = new AppleAuthResponse();
 
     const sessionId = req.session.id;
-    console.log(req.session);
 
-    store.get(sessionId, (err, session) => {
-      console.log(session);
+    await new Promise((res, rej) => {
+      store.get(sessionId, (err, session) => {
+        const newSessionData = session;
 
-      const newSessionData = session;
+        if (err) rej();
 
-      if (newSessionData && newSessionData.name) newSessionData.name += "a";
+        if (newSessionData && newSessionData.name) newSessionData.name += "a";
 
-      if (newSessionData) store.set(sessionId, newSessionData);
+        if (newSessionData) store.set(sessionId, newSessionData);
+
+        res(null);
+      });
     });
 
     if (!req.session.name) req.session.name = "alfie";
@@ -47,7 +50,15 @@ export class AppleAuthResolver {
     response.success = true;
     response.data = [req.session.name];
 
+    console.log(response);
     return response;
+  }
+
+  @Query((returns) => [User])
+  async testMongo(@Ctx() { req, res, store }: IContext) {
+    const User1 = await userModel.find<User>({ _id: "621052b66eb664627a04f051" });
+
+    return User1;
   }
 
   @Query((returns) => AppleAuthResponse)

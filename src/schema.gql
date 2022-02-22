@@ -52,6 +52,7 @@ type Query {
   name(firstname: String!): Name!
   names: [Name!]!
   test: AppleAuthResponse!
+  testMongo: [User!]!
   users: [User!]!
 }
 

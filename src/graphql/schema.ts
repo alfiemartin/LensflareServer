@@ -24,6 +24,7 @@ export class User {
   @Field()
   name: string;
 }
+
 @ObjectType()
 export class CrudResponse {
   @Field()
