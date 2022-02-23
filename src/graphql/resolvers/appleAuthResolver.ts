@@ -6,7 +6,7 @@ import jwksRsa from "jwks-rsa";
 import jwtDecode from "jwt-decode";
 import { Arg, Ctx, Mutation, Query, Resolver } from "type-graphql";
 import { AppleAuthenticationCredential, AppleAuthResponse } from "../../entity/AppleAuth";
-import { Users } from "../../entity/Users";
+import { User } from "../../entity/User";
 import { IAppleKey, ITokenData, ITokenHeader, TContext } from "../../types";
 
 const getPrevSession = (clientSessionId: string, store: MongoStore) => {
@@ -44,9 +44,9 @@ export class AppleAuthResolver {
     return response;
   }
 
-  @Query((returns) => [Users])
+  @Query((returns) => [User])
   async testMongo(@Ctx() { req, res, store, dbConnection }: TContext) {
-    const User1 = await dbConnection.manager.find(Users);
+    const User1 = await dbConnection.manager.find(User);
 
     return User1;
   }
@@ -126,7 +126,7 @@ export class AppleAuthResolver {
       return response;
     }
 
-    const user = await dbConnection.manager.findOne(Users, {
+    const user = await dbConnection.manager.findOne(User, {
       username: verifiedTokenData.email,
       password: "apple",
     });
@@ -189,7 +189,7 @@ export class AppleAuthResolver {
     const { email, fullName } = credential;
 
     try {
-      const user = dbConnection.manager.create(Users, {
+      const user = dbConnection.manager.create(User, {
         username: email,
         email,
         name: fullName.givenName,

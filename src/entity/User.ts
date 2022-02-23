@@ -3,7 +3,7 @@ import { Entity, ObjectIdColumn, ObjectID, Column } from "typeorm";
 
 @Entity()
 @ObjectType()
-export class Users {
+export class User {
   @ObjectIdColumn()
   @Field(() => String)
   id: ObjectID;

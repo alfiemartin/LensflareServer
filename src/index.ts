@@ -8,7 +8,7 @@ import { createConnection, ObjectID } from "typeorm";
 import { buildSchema } from "type-graphql";
 import * as path from "path";
 import * as cookieParser from "cookie-parser";
-import { UsersResolver } from "./graphql/resolvers/userResolver";
+import { UserResolver } from "./graphql/resolvers/userResolver";
 import { ApolloServer } from "apollo-server-express";
 import { AppleAuthResolver } from "./graphql/resolvers/appleAuthResolver";
 
@@ -29,11 +29,11 @@ const main = async () => {
   console.log("connected to mongodb database");
 
   const schema = await buildSchema({
-    resolvers: [UsersResolver, AppleAuthResolver],
+    resolvers: [UserResolver, AppleAuthResolver],
     emitSchemaFile: path.resolve(__dirname, "gql_schema.gql"),
   });
 
-  const secret = "hdsahdhsbdasd";
+  const secret = "jdnasdjsad883e3392jd29jd";
 
   app.use(cookieParser.default(secret));
 
@@ -75,7 +75,7 @@ const main = async () => {
     console.log("server running on http://localhost:4000");
   });
 
-  app.get("/", (req, res) => {
+  app.get("/", (_, res) => {
     res.sendFile(path.join(__dirname, "index.html"));
   });
 };

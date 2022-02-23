@@ -31,14 +31,14 @@ input AppleCredsFullName {
 }
 
 type Query {
+  User: [User!]!
   appleSignIn(credential: AppleAuthenticationCredential!, sessionId: String): AppleAuthResponse!
   appleSignUp(credential: AppleAuthenticationCredential!): AppleAuthResponse!
   test: AppleAuthResponse!
-  testMongo: [Users!]!
-  users: [Users!]!
+  testMongo: [User!]!
 }
 
-type Users {
+type User {
   email: String!
   id: String!
   name: String!

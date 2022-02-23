@@ -1,11 +1,11 @@
 import { Resolver, Arg, Ctx, Mutation, Query } from "type-graphql";
-import { Users } from "../../entity/Users";
+import { User } from "../../entity/User";
 import { TContext } from "../../types";
 
-@Resolver(Users)
-export class UsersResolver {
-  @Query(() => [Users])
-  async users(@Ctx() { dbConnection }: TContext) {
-    return dbConnection.manager.find(Users);
+@Resolver(User)
+export class UserResolver {
+  @Query(() => [User])
+  async User(@Ctx() { dbConnection }: TContext) {
+    return dbConnection.manager.find(User);
   }
 }
