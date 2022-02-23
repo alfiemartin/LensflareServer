@@ -192,7 +192,7 @@ export class AppleAuthResolver {
       const user = dbConnection.manager.create(User, {
         username: email,
         email,
-        name: fullName.givenName,
+        name: fullName.givenName ?? "alfie",
         password: "apple",
       });
 
