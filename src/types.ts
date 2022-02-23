@@ -1,5 +1,6 @@
 import MongoStore from "connect-mongo";
 import { Request, Response } from "express";
+import { Connection } from "typeorm";
 
 export interface ITokenData {
   iss: string;
@@ -28,4 +29,4 @@ export interface ITokenHeader {
   alg: string;
 }
 
-export type IContext = { req: Request; res: Response; store: MongoStore };
+export type TContext = { req: Request; res: Response; store: MongoStore; dbConnection: Connection };

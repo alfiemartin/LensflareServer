@@ -1,35 +1,41 @@
-require("dotenv").config();
+import "dotenv/config";
 import "reflect-metadata";
-
-import express, { Request } from "express";
+import express from "express";
 import session from "express-session";
 import cors from "cors";
-import { ApolloServer } from "apollo-server-express";
-import mongoose from "mongoose";
-import { AppleAuthResolver, NameResolver, UserResolver } from "./graphql/resolvers";
+import MongoStore from "connect-mongo";
+import { createConnection, ObjectID } from "typeorm";
 import { buildSchema } from "type-graphql";
 import * as path from "path";
-var cookieParser = require("cookie-parser");
-import MongoStore from "connect-mongo";
+import * as cookieParser from "cookie-parser";
+import { UsersResolver } from "./graphql/resolvers/userResolver";
+import { ApolloServer } from "apollo-server-express";
+import { AppleAuthResolver } from "./graphql/resolvers/appleAuthResolver";
 
 declare module "express-session" {
   interface SessionData {
     name: string | undefined;
-    userId: string | undefined;
+    userId: string | ObjectID | undefined;
   }
 }
 
 const main = async () => {
   const DB_URI = process.env.DB_URI!;
+
   const app = express();
 
+  const dbConnection = await createConnection();
+
+  console.log("connected to mongodb database");
+
   const schema = await buildSchema({
-    resolvers: [NameResolver, UserResolver, AppleAuthResolver],
-    emitSchemaFile: path.resolve(__dirname, "schema.gql"),
+    resolvers: [UsersResolver, AppleAuthResolver],
+    emitSchemaFile: path.resolve(__dirname, "gql_schema.gql"),
   });
+
   const secret = "hdsahdhsbdasd";
 
-  app.use(cookieParser(secret));
+  app.use(cookieParser.default(secret));
 
   const store = MongoStore.create({
     mongoUrl: DB_URI,
@@ -37,7 +43,7 @@ const main = async () => {
 
   app.use(
     session({
-      name: "mine",
+      name: "session",
       store: store,
       resave: true,
       secret: secret,
@@ -55,7 +61,7 @@ const main = async () => {
 
   const apolloServer = new ApolloServer({
     schema,
-    context: ({ req, res }) => ({ req, res, store }),
+    context: ({ req, res }) => ({ req, res, store, dbConnection }),
   });
   await apolloServer.start();
 
@@ -69,13 +75,9 @@ const main = async () => {
     console.log("server running on http://localhost:4000");
   });
 
-  try {
-    await mongoose.connect(DB_URI);
-  } catch (error) {
-    console.log("Error connecting to mongo db", error);
-  }
-
-  console.log("Successfully connected to mongo db");
+  app.get("/", (req, res) => {
+    res.sendFile(path.join(__dirname, "index.html"));
+  });
 };
 
 main();

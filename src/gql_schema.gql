@@ -30,35 +30,17 @@ input AppleCredsFullName {
   nickname: String
 }
 
-type CrudResponse {
-  message: String!
-  success: Boolean!
-}
-
-type Mutation {
-  addName(firstname: String!, secondname: String!): CrudResponse!
-  createUser(email: String!, password: String!, username: String!): CrudResponse!
-}
-
-type Name {
-  _id: String!
-  firstname: String!
-  secondname: String!
-}
-
 type Query {
   appleSignIn(credential: AppleAuthenticationCredential!, sessionId: String): AppleAuthResponse!
   appleSignUp(credential: AppleAuthenticationCredential!): AppleAuthResponse!
-  name(firstname: String!): Name!
-  names: [Name!]!
   test: AppleAuthResponse!
-  testMongo: [User!]!
-  users: [User!]!
+  testMongo: [Users!]!
+  users: [Users!]!
 }
 
-type User {
-  _id: String!
+type Users {
   email: String!
+  id: String!
   name: String!
   password: String!
   username: String!

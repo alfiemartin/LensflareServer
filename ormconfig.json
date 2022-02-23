@@ -1,0 +1,23 @@
+{
+   "type": "mongodb",
+   "url": "mongodb+srv://alfie-martin:Password1@poster.mzxzv.mongodb.net/alfies?retryWrites=true&w=majority",
+   "useNewUrlParser": true,
+   "synchronize": true,
+   "logging": true,
+   "useUnifiedTopology": true,
+   "database": "alfies",
+   "entities": [
+      "src/entity/**/*.ts"
+   ],
+   "migrations": [
+      "src/migration/**/*.ts"
+   ],
+   "subscribers": [
+      "src/subscriber/**/*.ts"
+   ],
+   "cli": {
+      "entitiesDir": "src/entity",
+      "migrationsDir": "src/migration",
+      "subscribersDir": "src/subscriber"
+   }
+}

@@ -5,9 +5,9 @@ import jwt from "jsonwebtoken";
 import jwksRsa from "jwks-rsa";
 import jwtDecode from "jwt-decode";
 import { Arg, Ctx, Mutation, Query, Resolver } from "type-graphql";
-import { userModel } from "../../mongoDB/modals";
-import { IAppleKey, IContext, ITokenData, ITokenHeader } from "../../types";
-import { AppleAuthenticationCredential, AppleAuthResponse, User } from "../schema";
+import { AppleAuthenticationCredential, AppleAuthResponse } from "../../entity/AppleAuth";
+import { Users } from "../../entity/Users";
+import { IAppleKey, ITokenData, ITokenHeader, TContext } from "../../types";
 
 const getPrevSession = (clientSessionId: string, store: MongoStore) => {
   return new Promise<SessionData>((resolve, reject) => {
@@ -24,39 +24,29 @@ const getPrevSession = (clientSessionId: string, store: MongoStore) => {
 @Resolver()
 export class AppleAuthResolver {
   @Query((returns) => AppleAuthResponse)
-  async test(@Ctx() { req, res, store }: IContext) {
+  async test(@Ctx() { req, res, store }: TContext) {
     const response = new AppleAuthResponse();
 
     const sessionId = req.session.id;
 
-    await new Promise((res, rej) => {
-      store.get(sessionId, (err, session) => {
-        const newSessionData = session;
-
-        if (err) rej();
-
-        if (newSessionData && newSessionData.name) newSessionData.name += "a";
-
-        if (newSessionData) store.set(sessionId, newSessionData);
-
-        res(null);
-      });
-    });
+    if (req.session.name) {
+      req.session.name += "a";
+    }
 
     if (!req.session.name) req.session.name = "alfie";
 
     response.message = "test endpoint";
     response.sessionId = sessionId;
     response.success = true;
-    response.data = [req.session.name];
+    response.name = req.session.name;
 
     console.log(response);
     return response;
   }
 
-  @Query((returns) => [User])
-  async testMongo(@Ctx() { req, res, store }: IContext) {
-    const User1 = await userModel.find<User>({ _id: "621052b66eb664627a04f051" });
+  @Query((returns) => [Users])
+  async testMongo(@Ctx() { req, res, store, dbConnection }: TContext) {
+    const User1 = await dbConnection.manager.find(Users);
 
     return User1;
   }
@@ -65,7 +55,7 @@ export class AppleAuthResolver {
   async appleSignIn(
     @Arg("credential") credential: AppleAuthenticationCredential,
     @Arg("sessionId", { nullable: true }) sessionId: string,
-    @Ctx() { req, res, store }: IContext
+    @Ctx() { req, res, store, dbConnection }: TContext
   ) {
     const response = new AppleAuthResponse();
     const clientSessionId = sessionId;
@@ -73,6 +63,8 @@ export class AppleAuthResolver {
     if (clientSessionId) {
       if (clientSessionId == req.sessionID) {
         response.success = true;
+        response.sessionId = req.sessionID;
+        response.name = req.session.name;
         response.message = "already logged in";
 
         return response;
@@ -134,13 +126,13 @@ export class AppleAuthResolver {
       return response;
     }
 
-    const user = await userModel.findOne<User>({
+    const user = await dbConnection.manager.findOne(Users, {
       username: verifiedTokenData.email,
       password: "apple",
     });
 
     if (user) {
-      req.session.userId = user._id;
+      req.session.userId = user.id;
       response.message = "signed in successfully";
       response.success = true;
       response.sessionId = req.sessionID;
@@ -152,10 +144,11 @@ export class AppleAuthResolver {
 
     return response;
   }
+
   @Query((returns) => AppleAuthResponse)
   async appleSignUp(
     @Arg("credential") credential: AppleAuthenticationCredential,
-    @Ctx() { req, res, store }: IContext
+    @Ctx() { req, res, store, dbConnection }: TContext
   ) {
     const response = new AppleAuthResponse();
 
@@ -196,7 +189,7 @@ export class AppleAuthResolver {
     const { email, fullName } = credential;
 
     try {
-      const user = await userModel.create({
+      const user = dbConnection.manager.create(Users, {
         username: email,
         email,
         name: fullName.givenName,
