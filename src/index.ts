@@ -11,6 +11,7 @@ import * as cookieParser from "cookie-parser";
 import { UserResolver } from "./graphql/resolvers/userResolver";
 import { ApolloServer } from "apollo-server-express";
 import { AppleAuthResolver } from "./graphql/resolvers/appleAuthResolver";
+import { PostResolver } from "./graphql/resolvers/postResolver";
 
 declare module "express-session" {
   interface SessionData {
@@ -29,7 +30,7 @@ const main = async () => {
   console.log("connected to mongodb database");
 
   const schema = await buildSchema({
-    resolvers: [UserResolver, AppleAuthResolver],
+    resolvers: [UserResolver, AppleAuthResolver, PostResolver],
     emitSchemaFile: path.resolve(__dirname, "gql_schema.gql"),
   });
 
