@@ -33,8 +33,6 @@ export class AppleAuthResolver {
       req.session.name += "a";
     }
 
-    if (!req.session.name) req.session.name = "alfie";
-
     response.message = "test endpoint";
     response.sessionId = sessionId;
     response.success = true;
@@ -45,7 +43,7 @@ export class AppleAuthResolver {
   }
 
   @Query((returns) => [User])
-  async testMongo(@Ctx() { req, res, store, dbConnection }: TContext) {
+  async testMongo(@Ctx() { dbConnection }: TContext) {
     const User1 = await dbConnection.manager.find(User);
 
     return User1;
@@ -145,7 +143,7 @@ export class AppleAuthResolver {
     return response;
   }
 
-  @Query((returns) => AppleAuthResponse)
+  @Mutation((returns) => AppleAuthResponse)
   async appleSignUp(
     @Arg("credential") credential: AppleAuthenticationCredential,
     @Ctx() { req, res, store, dbConnection }: TContext
@@ -190,15 +188,19 @@ export class AppleAuthResolver {
 
     try {
       const user = dbConnection.manager.create(User, {
-        username: email,
-        email,
+        username: email ?? "alfie.martin@hotmail.co.uk",
+        email: email ?? "alfie.martin@hotmail.co.uk",
         name: fullName.givenName ?? "alfie",
         password: "apple",
       });
 
+      await dbConnection.manager.save(user);
+
       response.success = true;
       response.message = "successfully creatde new user";
       response.sessionId = req.sessionID;
+      response.name = user.name;
+      return response;
     } catch (e) {
       response.success = false;
       response.message = "failed to signup user";

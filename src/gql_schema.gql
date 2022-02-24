@@ -30,10 +30,13 @@ input AppleCredsFullName {
   nickname: String
 }
 
+type Mutation {
+  appleSignUp(credential: AppleAuthenticationCredential!): AppleAuthResponse!
+}
+
 type Query {
   User: [User!]!
   appleSignIn(credential: AppleAuthenticationCredential!, sessionId: String): AppleAuthResponse!
-  appleSignUp(credential: AppleAuthenticationCredential!): AppleAuthResponse!
   test: AppleAuthResponse!
   testMongo: [User!]!
 }
