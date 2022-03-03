@@ -73,6 +73,7 @@ const main = async () => {
     await mongoose.connect(DB_URI);
   } catch (error) {
     console.log("Error connecting to mongo db", error);
+    return;
   }
 
   console.log("Successfully connected to mongo db");
