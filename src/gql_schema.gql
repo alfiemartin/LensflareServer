@@ -51,7 +51,7 @@ type Post {
 type Query {
   User: [User!]!
   appleSignIn(credential: AppleAuthenticationCredential!, sessionId: String): AppleAuthResponse!
-  getPosts: Post!
+  getPosts: [Post!]!
   test: AppleAuthResponse!
   testMongo: [User!]!
 }

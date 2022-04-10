@@ -5,13 +5,9 @@ import { TContext } from "../../types";
 
 @Resolver(Post)
 export class PostResolver {
-  @Query(() => Post)
+  @Query(() => [Post])
   async getPosts(@Ctx() { dbConnection }: TContext) {
-    const query = dbConnection;
-
-    const postRepo = getMongoRepository(Post);
-
-    return await dbConnection.manager.find(Post);
+    return dbConnection.manager.find(Post);
   }
 
   @Mutation(() => [Post])
