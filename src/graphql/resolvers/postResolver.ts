@@ -1,5 +1,4 @@
 import { Resolver, Query, Ctx, Mutation } from "type-graphql";
-import { getMongoRepository } from "typeorm";
 import { Post } from "../../entity/Post";
 import { TContext } from "../../types";
 
@@ -13,7 +12,7 @@ export class PostResolver {
   @Mutation(() => [Post])
   async newPost(@Ctx() { dbConnection }: TContext) {
     const newPost = new Post();
-    newPost.geometry = { coordinates: [-104.9903, 39.7392], type: "Point" };
+    newPost.geometry = { coordinates: [-73.93414657, 40.82302903], type: "Point" };
     newPost.posterName = "test";
 
     await dbConnection.manager.insert(Post, newPost);
@@ -21,3 +20,15 @@ export class PostResolver {
     return [newPost];
   }
 }
+
+//---
+
+/*
+const postRepository = dbConnection.getMongoRepository(Post);
+
+  const inside = await postRepository.find({
+    geometry: {
+      $geoIntersects: { $geometry: { type: "Point", coordinates: [-73.93414657, 40.82302903] } },
+    },
+  } as any);
+  */

@@ -12,6 +12,8 @@ import { UserResolver } from "./graphql/resolvers/userResolver";
 import { ApolloServer } from "apollo-server-express";
 import { AppleAuthResolver } from "./graphql/resolvers/appleAuthResolver";
 import { PostResolver } from "./graphql/resolvers/postResolver";
+import { Post } from "./entity/Post";
+import { __Directive } from "graphql";
 
 declare module "express-session" {
   interface SessionData {
@@ -79,6 +81,16 @@ const main = async () => {
   app.get("/", (_, res) => {
     res.sendFile(path.join(__dirname, "index.html"));
   });
+
+  const postRepository = dbConnection.getMongoRepository(Post);
+
+  const inside = await postRepository.find({
+    geometry: {
+      $geoIntersects: { $geometry: { type: "Point", coordinates: [-73.93414657, 40.82302903] } },
+    },
+  } as any);
+
+  console.log(inside[0]);
 };
 
 main();
