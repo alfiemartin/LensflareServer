@@ -52,6 +52,7 @@ type Query {
   User: [User!]!
   appleSignIn(credential: AppleAuthenticationCredential!, sessionId: String): AppleAuthResponse!
   getPosts: [Post!]!
+  getPostsWithinDistance(distance: Float!, lat: Float!, long: Float!): [Post!]!
   test: AppleAuthResponse!
   testMongo: [User!]!
 }
