@@ -1,6 +1,5 @@
-import { ObjectId } from "mongodb";
 import { Resolver, Query, Ctx, Mutation, Arg } from "type-graphql";
-import { getOneOrMinusOne, getRandomPic, getRandomUser } from "../../../utilities";
+import { getOneOrMinusOne, getRandomPic, getRandomUser } from "../../utilities/mockData";
 import { Post } from "../../entity/Post";
 import { TContext } from "../../types";
 
