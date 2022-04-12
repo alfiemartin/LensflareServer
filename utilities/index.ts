@@ -46,6 +46,16 @@ export const getRandomUser = async () => {
   });
 };
 
+export const getRandomPic = () => {
+  return new Promise<string>((resolve, reject) => {
+    axios("https://picsum.photos/1200/600")
+      .then((res) => {
+        resolve(res.request.res.responseUrl);
+      })
+      .catch((e) => reject(e));
+  });
+};
+
 /*
     Latitude φ: (-90°<φ≤90°).   (y)
     Longitude λ (-180°<φ≤180°). (x)

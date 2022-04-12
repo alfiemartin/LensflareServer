@@ -16,7 +16,7 @@ export class Location {
 export class Post {
   @ObjectIdColumn()
   @Field(() => String, { nullable: true })
-  id: ObjectId;
+  _id: ObjectId;
 
   @Column()
   @Field({ nullable: true })
@@ -29,6 +29,10 @@ export class Post {
   @Column()
   @Field({ nullable: true })
   posterProfilePic: string;
+
+  @Column()
+  @Field({ nullable: false })
+  postImage: string;
 
   @Column()
   @Field((returns) => Location, { nullable: true })

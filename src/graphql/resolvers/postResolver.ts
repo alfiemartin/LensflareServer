@@ -1,6 +1,6 @@
 import { ObjectId } from "mongodb";
 import { Resolver, Query, Ctx, Mutation, Arg } from "type-graphql";
-import { getOneOrMinusOne, getRandomUser } from "../../../utilities";
+import { getOneOrMinusOne, getRandomPic, getRandomUser } from "../../../utilities";
 import { Post } from "../../entity/Post";
 import { TContext } from "../../types";
 
@@ -37,33 +37,15 @@ export class PostResolver {
       getOneOrMinusOne() * Math.random() * 90,
     ];
     const randomUser = await getRandomUser();
+    const randomPic = await getRandomPic();
 
     newPost.geometry = { coordinates: [randomLong, randomLat], type: "Point" };
-    newPost.posterName = "test";
-    newPost.id = new ObjectId(parseInt(randomUser.id));
+    newPost.posterName = randomUser.name.first;
     newPost.posterProfilePic = randomUser.picture;
+    newPost.postImage = randomPic;
 
     await dbConnection.manager.insert(Post, newPost);
 
     return newPost;
   }
 }
-
-//---
-/*
-const postRepository = dbConnection.getMongoRepository(Post);
-
-  const intersects = await postRepository.find({
-    geometry: {
-      $geoIntersects: { $geometry: { type: "Point", coordinates: [-73.93414657, 40.82302903] } },
-    },
-  } as any);
-
-
-
-  const inside = await postRepository.find({
-    geometry: {
-      $geoWithin: { $center: [[-73, 42], 10] },
-    },
-  } as any);
-*/

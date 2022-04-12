@@ -41,8 +41,9 @@ type Mutation {
 }
 
 type Post {
+  _id: String
   geometry: Location
-  id: String
+  postImage: String!
   posterId: String
   posterName: String
   posterProfilePic: String
@@ -58,8 +59,8 @@ type Query {
 }
 
 type User {
+  _id: String!
   email: String!
-  id: String!
   name: String!
   password: String!
   username: String!
