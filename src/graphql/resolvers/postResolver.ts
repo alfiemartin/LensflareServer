@@ -1,4 +1,6 @@
+import { ObjectId } from "mongodb";
 import { Resolver, Query, Ctx, Mutation, Arg } from "type-graphql";
+import { getOneOrMinusOne, getRandomUser } from "../../../utilities";
 import { Post } from "../../entity/Post";
 import { TContext } from "../../types";
 
@@ -6,7 +8,6 @@ import { TContext } from "../../types";
 export class PostResolver {
   @Query(() => [Post])
   async getPosts(@Ctx() { dbConnection }: TContext) {
-    const postRepository = dbConnection.getMongoRepository(Post);
     return dbConnection.manager.find(Post);
   }
 
@@ -28,15 +29,23 @@ export class PostResolver {
     return postsWithinRadius;
   }
 
-  @Mutation(() => [Post])
-  async newPost(@Ctx() { dbConnection }: TContext) {
+  @Mutation(() => Post)
+  async createRandomPost(@Ctx() { dbConnection }: TContext) {
     const newPost = new Post();
-    newPost.geometry = { coordinates: [-23.93414657, 10.82302903], type: "Point" };
+    const [randomLong, randomLat] = [
+      getOneOrMinusOne() * Math.random() * 180,
+      getOneOrMinusOne() * Math.random() * 90,
+    ];
+    const randomUser = await getRandomUser();
+
+    newPost.geometry = { coordinates: [randomLong, randomLat], type: "Point" };
     newPost.posterName = "test";
+    newPost.id = new ObjectId(parseInt(randomUser.id));
+    newPost.posterProfilePic = randomUser.picture;
 
     await dbConnection.manager.insert(Post, newPost);
 
-    return [newPost];
+    return newPost;
   }
 }
 

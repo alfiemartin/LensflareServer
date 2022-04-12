@@ -1,5 +1,6 @@
 import { Field, ObjectType } from "type-graphql";
-import { Entity, ObjectIdColumn, ObjectID, Column } from "typeorm";
+import { Entity, ObjectIdColumn, Column } from "typeorm";
+import { ObjectId } from "mongodb";
 
 @ObjectType()
 export class Location {
@@ -15,7 +16,7 @@ export class Location {
 export class Post {
   @ObjectIdColumn()
   @Field(() => String, { nullable: true })
-  id: ObjectID;
+  id: ObjectId;
 
   @Column()
   @Field({ nullable: true })

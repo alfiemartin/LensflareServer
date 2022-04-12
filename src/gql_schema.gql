@@ -37,7 +37,7 @@ type Location {
 
 type Mutation {
   appleSignUp(credential: AppleAuthenticationCredential!): AppleAuthResponse!
-  newPost: [Post!]!
+  createRandomPost: Post!
 }
 
 type Post {

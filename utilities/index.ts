@@ -1,3 +1,15 @@
+import axios from "axios";
+
+type RandomUser = {
+  name: {
+    title: string;
+    first: string;
+    last: string;
+  };
+  picture: string;
+  id: string;
+};
+
 //needs approximating
 export const distanceApproximator = (long1: number, lat1: number, long2: number, lat2: number) => {
   const R = 6371;
@@ -14,6 +26,24 @@ export const distanceApproximator = (long1: number, lat1: number, long2: number,
   const d = R * c;
 
   return d;
+};
+
+export const getOneOrMinusOne = () => {
+  return Math.random() == 1 ? 1 : -1;
+};
+
+export const getRandomUser = async () => {
+  return new Promise<RandomUser>((resolve, reject) => {
+    axios("https://randomuser.me/api/", { responseType: "json" })
+      .then((res) => {
+        const name = res.data.results[0].name;
+        const picture = res.data.results[0].picture.large;
+        const id = res.data.results[0].id.value;
+
+        resolve({ name, picture, id });
+      })
+      .catch((e) => reject(e));
+  });
 };
 
 /*

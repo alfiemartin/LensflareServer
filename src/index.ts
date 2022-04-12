@@ -13,7 +13,7 @@ import { ApolloServer } from "apollo-server-express";
 import { AppleAuthResolver } from "./graphql/resolvers/appleAuthResolver";
 import { PostResolver } from "./graphql/resolvers/postResolver";
 import { __Directive } from "graphql";
-import { distanceApproximator } from "../utilities";
+import { distanceApproximator, getRandomUser } from "../utilities";
 
 declare module "express-session" {
   interface SessionData {
@@ -81,6 +81,8 @@ const main = async () => {
   app.get("/", (_, res) => {
     res.sendFile(path.join(__dirname, "index.html"));
   });
+
+  getRandomUser();
 };
 
 main();
