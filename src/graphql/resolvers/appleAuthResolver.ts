@@ -1,6 +1,4 @@
 import axios from "axios";
-import MongoStore from "connect-mongo";
-import { SessionData } from "express-session";
 import jwt from "jsonwebtoken";
 import jwksRsa from "jwks-rsa";
 import jwtDecode from "jwt-decode";
@@ -8,47 +6,10 @@ import { Arg, Ctx, Mutation, Query, Resolver } from "type-graphql";
 import { AppleAuthenticationCredential, AppleAuthResponse } from "../../entity/AppleAuth";
 import { User } from "../../entity/User";
 import { IAppleKey, ITokenData, ITokenHeader, TContext } from "../../types";
-
-const getPrevSession = (clientSessionId: string, store: MongoStore) => {
-  return new Promise<SessionData>((resolve, reject) => {
-    store.get(clientSessionId, (err, session) => {
-      if (session) {
-        resolve(session);
-      } else {
-        reject();
-      }
-    });
-  });
-};
+import { getPrevSession } from "../../utilities/session";
 
 @Resolver()
 export class AppleAuthResolver {
-  @Query((returns) => AppleAuthResponse)
-  async test(@Ctx() { req, res, store }: TContext) {
-    const response = new AppleAuthResponse();
-
-    const sessionId = req.session.id;
-
-    if (req.session.name) {
-      req.session.name += "a";
-    }
-
-    response.message = "test endpoint";
-    response.sessionId = sessionId;
-    response.success = true;
-    response.name = req.session.name;
-
-    console.log(response);
-    return response;
-  }
-
-  @Query((returns) => [User])
-  async testMongo(@Ctx() { dbConnection }: TContext) {
-    const User1 = await dbConnection.manager.find(User);
-
-    return User1;
-  }
-
   @Query((returns) => AppleAuthResponse)
   async appleSignIn(
     @Arg("credential") credential: AppleAuthenticationCredential,
@@ -130,7 +91,7 @@ export class AppleAuthResolver {
     });
 
     if (user) {
-      req.session.userId = user.id;
+      req.session.userId = user._id;
       response.message = "signed in successfully";
       response.success = true;
       response.sessionId = req.sessionID;

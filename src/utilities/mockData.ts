@@ -1,14 +1,5 @@
 import axios from "axios";
-
-type RandomUser = {
-  name: {
-    title: string;
-    first: string;
-    last: string;
-  };
-  picture: string;
-  id: string;
-};
+import { RandomUser } from "../types";
 
 export const getOneOrMinusOne = () => {
   return Math.random() == 1 ? 1 : -1;

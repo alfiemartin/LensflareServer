@@ -4,20 +4,22 @@ import express from "express";
 import session from "express-session";
 import cors from "cors";
 import MongoStore from "connect-mongo";
-import { createConnection, ObjectID } from "typeorm";
-import { buildSchema } from "type-graphql";
 import * as path from "path";
 import * as cookieParser from "cookie-parser";
+import { createConnection, ObjectID } from "typeorm";
+import { buildSchema } from "type-graphql";
 import { UserResolver } from "./graphql/resolvers/userResolver";
 import { ApolloServer } from "apollo-server-express";
 import { AppleAuthResolver } from "./graphql/resolvers/appleAuthResolver";
 import { PostResolver } from "./graphql/resolvers/postResolver";
 import { __Directive } from "graphql";
+import { DevResolver } from "./graphql/resolvers/devResolver";
+import { ObjectId } from "mongodb";
 
 declare module "express-session" {
   interface SessionData {
     name: string | undefined;
-    userId: string | ObjectID | undefined;
+    userId: string | ObjectId | undefined;
   }
 }
 
@@ -31,7 +33,7 @@ const main = async () => {
   console.log("connected to mongodb database");
 
   const schema = await buildSchema({
-    resolvers: [UserResolver, AppleAuthResolver, PostResolver],
+    resolvers: [DevResolver, UserResolver, AppleAuthResolver, PostResolver],
     emitSchemaFile: path.resolve(__dirname, "gql_schema.gql"),
   });
 
@@ -53,7 +55,7 @@ const main = async () => {
       cookie: {
         httpOnly: false,
         sameSite: "none",
-        secure: false,
+        secure: true,
       },
     })
   );

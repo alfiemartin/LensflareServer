@@ -1,6 +1,7 @@
 import MongoStore from "connect-mongo";
 import { Request, Response } from "express";
 import { Connection } from "typeorm";
+import { ObjectId } from "mongodb";
 
 export interface ITokenData {
   iss: string;
@@ -30,3 +31,13 @@ export interface ITokenHeader {
 }
 
 export type TContext = { req: Request; res: Response; store: MongoStore; dbConnection: Connection };
+
+export type RandomUser = {
+  name: {
+    title: string;
+    first: string;
+    last: string;
+  };
+  picture: string;
+  id: string;
+};
