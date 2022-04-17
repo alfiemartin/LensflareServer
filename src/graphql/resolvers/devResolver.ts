@@ -2,6 +2,8 @@ import { Resolver, Query, Ctx } from "type-graphql";
 import { TestResponse } from "../../entity/Test";
 import { User } from "../../entity/User";
 import { TContext } from "../../types";
+import { logEntity, logLog } from "../../utilities/logging";
+import _ from "lodash";
 
 @Resolver()
 export class DevResolver {
@@ -20,7 +22,7 @@ export class DevResolver {
     response.success = true;
     response.name = req.session.name;
 
-    console.log(response);
+    logEntity(response);
     return response;
   }
 

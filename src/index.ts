@@ -12,7 +12,7 @@ import { ApolloServer } from "apollo-server-express";
 import { __Directive } from "graphql";
 import { ObjectId } from "mongodb";
 import { DevResolver, AppleAuthResolver, PostResolver, UserResolver } from "./graphql/resolvers";
-import { badLog, goodLog, logLog } from "./utilities";
+import { badLog, goodLog } from "./utilities/logging";
 
 declare module "express-session" {
   interface SessionData {
