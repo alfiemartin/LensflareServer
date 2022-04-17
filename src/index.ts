@@ -6,15 +6,13 @@ import cors from "cors";
 import MongoStore from "connect-mongo";
 import * as path from "path";
 import * as cookieParser from "cookie-parser";
-import { createConnection, ObjectID } from "typeorm";
+import { Connection, createConnection } from "typeorm";
 import { buildSchema } from "type-graphql";
-import { UserResolver } from "./graphql/resolvers/userResolver";
 import { ApolloServer } from "apollo-server-express";
-import { AppleAuthResolver } from "./graphql/resolvers/appleAuthResolver";
-import { PostResolver } from "./graphql/resolvers/postResolver";
 import { __Directive } from "graphql";
-import { DevResolver } from "./graphql/resolvers/devResolver";
 import { ObjectId } from "mongodb";
+import { DevResolver, AppleAuthResolver, PostResolver, UserResolver } from "./graphql/resolvers";
+import { badLog, goodLog, logLog } from "./utilities";
 
 declare module "express-session" {
   interface SessionData {
@@ -27,10 +25,15 @@ const main = async () => {
   const DB_URI = process.env.DB_URI!;
 
   const app = express();
+  let dbConnection: Connection;
 
-  const dbConnection = await createConnection();
-
-  console.log("connected to mongodb database");
+  try {
+    dbConnection = await createConnection();
+  } catch (e) {
+    badLog("could not connected to mongo db", e);
+    return;
+  }
+  goodLog("connected to mongodb");
 
   const schema = await buildSchema({
     resolvers: [DevResolver, UserResolver, AppleAuthResolver, PostResolver],
@@ -76,7 +79,7 @@ const main = async () => {
   });
 
   app.listen(4000, () => {
-    console.log("server running on http://localhost:4000");
+    goodLog("server running on http://localhost:4000/graphql");
   });
 
   app.get("/", (_, res) => {

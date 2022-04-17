@@ -1,7 +1,6 @@
 import MongoStore from "connect-mongo";
 import { Request, Response } from "express";
 import { Connection } from "typeorm";
-import { ObjectId } from "mongodb";
 
 export interface ITokenData {
   iss: string;

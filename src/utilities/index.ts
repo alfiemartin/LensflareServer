@@ -1,3 +1,5 @@
+import chalk from "chalk";
+
 //needs approximating
 export const distanceApproximator = (long1: number, lat1: number, long2: number, lat2: number) => {
   const R = 6371;
@@ -15,6 +17,18 @@ export const distanceApproximator = (long1: number, lat1: number, long2: number,
 
   return d;
 };
+
+export function goodLog(...args: any[]) {
+  console.log(chalk.bgBlack.green(...arguments));
+}
+
+export function badLog(...args: any[]) {
+  console.log(chalk.bgBlack.redBright(...arguments));
+}
+
+export function logLog(...args: any[]) {
+  console.log(chalk.bgBlack.magentaBright(...arguments));
+}
 
 /*
     Latitude φ: (-90°<φ≤90°).   (y)
