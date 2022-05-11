@@ -1,5 +1,5 @@
 import { Resolver, Query, Ctx, Mutation, Arg } from "type-graphql";
-import { getOneOrMinusOne, getRandomPic, getRandomUser } from "../../utilities/mockData";
+import { getRandomCoords, getRandomPic, getRandomUser } from "../../utilities/mockData";
 import { Post } from "../../entity/Post";
 import { TContext } from "../../types";
 
@@ -15,7 +15,7 @@ export class PostResolver {
     @Ctx() { dbConnection }: TContext,
     @Arg("long") long: number,
     @Arg("lat") lat: number,
-    @Arg("distance") distance: number
+    @Arg("distance") distance: number //Km
   ) {
     const postRepository = dbConnection.getMongoRepository(Post);
 
@@ -30,18 +30,16 @@ export class PostResolver {
 
   @Mutation(() => Post)
   async createRandomPost(@Ctx() { dbConnection }: TContext) {
-    const newPost = new Post();
-    const [randomLong, randomLat] = [
-      getOneOrMinusOne() * Math.random() * 180,
-      getOneOrMinusOne() * Math.random() * 90,
-    ];
+    const randomCoords = getRandomCoords();
     const randomUser = await getRandomUser();
     const randomPic = await getRandomPic();
 
-    newPost.geometry = { coordinates: [randomLong, randomLat], type: "Point" };
-    newPost.posterName = randomUser.name.first;
-    newPost.posterProfilePic = randomUser.picture;
-    newPost.postImage = randomPic;
+    const newPost = new Post({
+      geometry: { coordinates: randomCoords, type: "Point" },
+      posterName: randomUser.name.first,
+      posterProfilePic: randomUser.picture,
+      postImage: randomPic,
+    });
 
     await dbConnection.manager.insert(Post, newPost);
 

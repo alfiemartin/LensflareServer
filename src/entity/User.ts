@@ -5,6 +5,10 @@ import { Entity, ObjectIdColumn, Column } from "typeorm";
 @Entity()
 @ObjectType()
 export class User {
+  constructor(user?: Partial<User>) {
+    Object.assign(this, user);
+  }
+
   @ObjectIdColumn()
   @Field(() => String)
   _id: ObjectId;

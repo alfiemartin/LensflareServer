@@ -29,9 +29,11 @@ export interface ITokenHeader {
   alg: string;
 }
 
+export type Coords = [number, number];
+
 export type TContext = { req: Request; res: Response; store: MongoStore; dbConnection: Connection };
 
-export type RandomUser = {
+export interface RandomUser {
   name: {
     title: string;
     first: string;
@@ -39,4 +41,4 @@ export type RandomUser = {
   };
   picture: string;
   id: string;
-};
+}

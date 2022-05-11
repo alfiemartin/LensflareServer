@@ -158,7 +158,7 @@ export class AppleAuthResolver {
       await dbConnection.manager.save(user);
 
       response.success = true;
-      response.message = "successfully creatde new user";
+      response.message = "successfully created new user";
       response.sessionId = req.sessionID;
       response.name = user.name;
       return response;

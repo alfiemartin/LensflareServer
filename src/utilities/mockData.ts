@@ -1,8 +1,12 @@
 import axios from "axios";
-import { RandomUser } from "../types";
+import { Coords, RandomUser } from "../types";
 
 export const getOneOrMinusOne = () => {
   return Math.random() == 1 ? 1 : -1;
+};
+
+export const getRandomCoords = (): Coords => {
+  return [getOneOrMinusOne() * Math.random() * 180, getOneOrMinusOne() * Math.random() * 90];
 };
 
 export const getRandomUser = async () => {

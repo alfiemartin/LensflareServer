@@ -2,6 +2,10 @@ import { ObjectType, Field, InputType } from "type-graphql";
 
 @ObjectType()
 export class CrudResponse {
+  constructor(crudResponse?: Partial<CrudResponse>) {
+    Object.assign(this, crudResponse);
+  }
+
   @Field()
   message: string;
   @Field()
@@ -10,6 +14,10 @@ export class CrudResponse {
 
 @ObjectType()
 export class AppleAuthResponse {
+  constructor(appleAuthResponse?: Partial<AppleAuthResponse>) {
+    Object.assign(this, appleAuthResponse);
+  }
+
   @Field({ nullable: true })
   message?: string;
   @Field({ nullable: true })
@@ -24,6 +32,10 @@ export class AppleAuthResponse {
 
 @InputType()
 class AppleCredsFullName {
+  constructor(appleCredsFullName?: Partial<AppleCredsFullName>) {
+    Object.assign(this, appleCredsFullName);
+  }
+
   @Field({ nullable: true })
   namePrefix: string;
   @Field({ nullable: true })
@@ -40,6 +52,10 @@ class AppleCredsFullName {
 
 @InputType()
 export class AppleAuthenticationCredential {
+  constructor(appleAuthenticationCredential?: Partial<AppleAuthenticationCredential>) {
+    Object.assign(this, appleAuthenticationCredential);
+  }
+
   @Field((returns) => String, { nullable: true })
   user: string;
   @Field((returns) => String, { nullable: true })

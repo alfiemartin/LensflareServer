@@ -58,7 +58,7 @@ const main = async () => {
       cookie: {
         httpOnly: false,
         sameSite: "none",
-        secure: true,
+        secure: false,
       },
     })
   );
